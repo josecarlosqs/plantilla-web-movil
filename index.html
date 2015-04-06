@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Plantilla</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
+
+	<script type="text/javascript" src="js/hammer.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="css/font-awesome.min.css">
+	<style type="text/css">
+		html, body{
+			height: 100%;
+			width: 100%;
+			margin: 0px;
+			padding: 0px;
+		}
+		#general{
+			overflow: hidden;
+			width: 100%;
+			height: 100%;
+			display: block;
+			position: relative;
+		}
+		#contenedor{
+			display: block;
+			vertical-align: baseline;
+			position: relative;
+			min-width: 10px;
+			height:100%;
+			white-space: nowrap;
+		}
+		.pantalla{
+			display: inline-block;
+			width: 100%;
+			height: 100%;
+			background: blue;
+			position: relative;
+			margin: 0px;
+			padding: 0px;
+			background-size: cover;
+		}
+		#pnt1{background-image: url("img/fondo1.jpg");}
+		#pnt2{background-image: url("img/fondo2.jpg");}
+		#pnt3{background-image: url("img/fondo3.jpg");}
+		#pnt4{background-image: url("img/fondo4.jpg");}
+		#pnt5{background-image: url("img/fondo5.jpg");}
+		#pnt6{background-image: url("img/fondo6.jpg");}
+		#pnt7{background-image: url("img/fondo7.jpg");}
+
+		#sig{
+			position: absolute;
+			right: 10px;
+		}
+
+	</style>
+</head>
+<body>
+	<div id="cabecera"></div>
+	<div id="sig"><i class="fa fa-angle-right"></i></div>
+	<div id="general">
+		<div id="contenedor">
+			<div id="pnt1" class="pantalla"><h1>pantalla nº1</h1></div>
+			<div id="pnt2" class="pantalla"><h1>pantalla nº2</h1></div>
+			<div id="pnt3" class="pantalla"><h1>pantalla nº3</h1></div>
+			<div id="pnt4" class="pantalla"><h1>pantalla nº4</h1></div>
+			<div id="pnt5" class="pantalla"><h1>pantalla nº5</h1></div>
+			<div id="pnt6" class="pantalla"><h1>pantalla nº6</h1></div>
+			<div id="pnt7" class="pantalla"><h1>pantalla nº7</h1></div>
+		</div>
+	</div>
+	
+	<script type="text/javascript">
+		var pantallas = document.getElementsByClassName('pantalla'),
+			contenedor = document.getElementById('contenedor'),
+			general = document.getElementById('general'),
+			dimensionesPantalla = posPantallas = [],
+			actual = 0,
+			pasarSiguiente = pasarAnterior = false,
+			ubicarPantallas = function(){
+				pantallas = document.getElementsByClassName('pantalla');
+				for(i = 0; i < pantallas.length; i++){
+					posPantallas.push(pantallas[i].offsetLeft)
+				}
+			},
+			refrescarValores = function(){
+				dimensionesPantalla = [(window.innerWidth || document.documentElement.clientWidth || document.getElementsByTagName('body')[0].clientWidth) , (window.innerHeight|| document.documentElement.clientHeight|| document.getElementsByTagName('body')[0].clientHeight)];
+				ubicarPantallas();
+			},
+			scrollTo = function(elemento, duracion) {
+			    if (duracion < 0) return;
+			    var difference = posPantallas[elemento] - general.scrollLeft;
+			    
+			    var perTick = difference / duracion * 10;
+
+
+			    setTimeout(function() {
+			        general.scrollLeft = general.scrollLeft + perTick;
+			        if (general.scrollLeft === posPantallas[elemento]) return;
+			        scrollTo(elemento, duracion - 10);
+			    }, 10);
+			};
+		
+		Hammer.on(window, "load resize", function(e){
+			refrescarValores();
+		});
+		var mc = new Hammer(contenedor);
+		mc.add( new Hammer.Press({ event: 'toque', time: 1 }) );
+		mc.add( new Hammer.Pan({ threshold: 0 }) );
+		// listen to events...
+		//mc.on("panleft panright tap press", function(ev) {
+		mc
+		.on("toque",function(e){
+
+	    })
+	    .on("panend",function(e){
+	    	//console.log(e.center);
+	    	//console.log("soltado");
+	    	if(pasarSiguiente == true && pasarAnterior == false){
+	    		actual++;
+	    		pasarSiguiente = false;
+	    	}else if(pasarSiguiente == false && pasarAnterior == true){
+	    		actual--;
+	    		pasarAnterior = false;
+	    	}else{
+	    		pasarAnterior = pasarSiguiente = false;
+	    	}
+	    	scrollTo(actual, 200);
+	    	
+	    })
+		.on("panleft", function(ev) {
+			if(ev.velocity > 4 || ev.distance/dimensionesPantalla[0] >= 0.5){
+				pasarSiguiente = true;
+			}
+		    general.scrollLeft = posPantallas[actual] + ev.distance;
+		    console.log(ev.distance/dimensionesPantalla[0]);
+		})
+		.on("panright", function(ev) {
+			if(ev.velocity < -4 || ev.distance/dimensionesPantalla[0] >= 0.5){
+				pasarAnterior = true;
+			}
+		    general.scrollLeft = posPantallas[actual] - ev.distance;
+		    console.log(ev.distance/dimensionesPantalla[0]);
+		    
+		});
+	</script>
+</body>
+</html>
